@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/catalogFragment">
+
+    <fragment
+        android:id="@+id/catalogFragment"
+        android:name="com.example.mycatalog.CatalogFragment"
+        android:label="Catalog" />
+
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.example.mycatalog.AboutFragment"
+        android:label="About" />
+
+</navigation>
