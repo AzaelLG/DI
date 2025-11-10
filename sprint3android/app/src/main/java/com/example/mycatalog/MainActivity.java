@@ -1,10 +1,15 @@
 package com.example.mycatalog;
 
 import android.os.Bundle;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -14,14 +19,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment);
+        setupNavegacion();
+    }
 
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
 
-            BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-            NavigationUI.setupWithNavController(bottomNav, navController);
-        }
+
+    private void setupNavegacion(){
+        BottomNavigationView bottomNavigationView=findViewById(R.id.bottomNavigationView);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_hostfragment);
+        NavigationUI.setupWithNavController(
+                bottomNavigationView,
+                navHostFragment.getNavController()
+        );
     }
 }

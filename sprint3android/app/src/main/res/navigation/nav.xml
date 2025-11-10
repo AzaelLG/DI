@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav"
+    app:startDestination="@id/page_about">
+
+
+    <fragment
+        android:id="@+id/page_detail"
+        android:name="com.example.mycatalog.DetailFragment"
+        tools:layout="@layout/fragment_detail"/>
+
+    <fragment
+        android:id="@+id/page_catalog"
+        android:name="com.example.mycatalog.CatalogFragment"
+        tools:layout="@layout/fragment_catalog">
+
+        <action
+            android:id="@+id/action_page_catalog_to_page_detail"
+            app:destination="@id/page_detail" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/page_about"
+        android:name="com.example.mycatalog.AboutFragment"
+        tools:layout="@layout/fragment_about"/>
+
+</navigation>
