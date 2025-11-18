@@ -1,5 +1,52 @@
 import customtkinter as ctk
 
+
+class AddUserView:
+    def __init__(self, master, avatar_names):
+        self.window = ctk.CTkToplevel(master)
+        self.window.title("Añadir Nuevo Usuario")
+        self.window.geometry("350x400")
+        self.window.grab_set()  # ¡Esto la hace modal!
+
+        self.frame = ctk.CTkFrame(self.window)
+        self.frame.pack(padx=20, pady=20, fill="both", expand=True)
+
+        # Widgets del formulario
+        ctk.CTkLabel(self.frame, text="Nombre:").pack(pady=(10, 0))
+        self.nombre_entry = ctk.CTkEntry(self.frame)
+        self.nombre_entry.pack(fill="x", padx=10)
+
+        ctk.CTkLabel(self.frame, text="Edad:").pack(pady=(10, 0))
+        self.edad_entry = ctk.CTkEntry(self.frame)
+        self.edad_entry.pack(fill="x", padx=10)
+
+        ctk.CTkLabel(self.frame, text="Género:").pack(pady=(10, 0))
+        self.genero_var = ctk.StringVar(value="No especificado")
+        self.genero_optionmenu = ctk.CTkOptionMenu(self.frame,
+                                                   values=["Masculino", "Femenino", "No especificado"],
+                                                   variable=self.genero_var)
+        self.genero_optionmenu.pack(fill="x", padx=10)
+
+        ctk.CTkLabel(self.frame, text="Avatar:").pack(pady=(10, 0))
+        self.avatar_var = ctk.StringVar(value=avatar_names[0] if avatar_names else "")
+        self.avatar_optionmenu = ctk.CTkOptionMenu(self.frame,
+                                                   values=avatar_names,
+                                                   variable=self.avatar_var)
+        self.avatar_optionmenu.pack(fill="x", padx=10)
+
+        # El botón de guardar será configurado por el controlador
+        self.guardar_button = ctk.CTkButton(self.frame, text="Guardar")
+        self.guardar_button.pack(pady=20)
+
+    def get_data(self):
+        """Recoge los datos del formulario y los devuelve como diccionario."""
+        return {
+            "nombre": self.nombre_entry.get(),
+            "edad": self.edad_entry.get(),
+            "genero": self.genero_var.get(),
+            "avatar": self.avatar_var.get()
+        }
+
 class MainView:
     def __init__(self, master):
         self.master = master
@@ -84,3 +131,11 @@ class MainView:
             self.edad_label.configure(text="Edad:")
             self.genero_label.configure(text="Género:")
             self.avatar_label.configure(image=None, text="")
+
+    def _crear_widgets_lista(self):
+        """Crea el frame para la lista de usuarios y el botón de añadir."""
+        # ... (Frame y Label igual)
+
+        # Botón para abrir la ventana modal
+        self.add_button = ctk.CTkButton(self.lista_frame, text="➕ Añadir Usuario")
+        self.add_button.pack(fill="x", padx=5, pady=(5, 10))

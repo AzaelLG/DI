@@ -41,3 +41,7 @@ class GestorUsuarios:
             if usuario.nombre == nombre:
                 return i
         return -1
+
+    def agregar(self, usuario):
+        """Añade un nuevo objeto Usuario a la lista."""
+        self._usuarios.append(usuario)
