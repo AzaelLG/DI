@@ -1,4 +1,5 @@
 import csv
+from pathlib import Path
 
 
 class Usuario:
@@ -17,16 +18,12 @@ class Usuario:
 class GestorUsuarios:
     """Clase que gestiona la lista de usuarios y la lógica de negocio."""
 
-    def __init__(self,archivo_csv="usuarios.csv"):
-        self._usuarios = []
+    def __init__(self, archivo_csv="usuarios.csv"):
         self.ARCHIVO_CSV = archivo_csv
+        self._usuarios = []
+        # No carga datos de ejemplo, se usa la carga desde CSV
 
-    def _cargar_datos_de_ejemplo(self):
-        """Añade usuarios de ejemplo para la prueba inicial."""
-        self._usuarios.append(Usuario("Ana García", 28, "Femenino", "avatar1.png"))
-        self._usuarios.append(Usuario("Luis Pérez", 34, "Masculino", "avatar2.png"))
-        self._usuarios.append(Usuario("Elena Ruiz", 22, "Femenino", "avatar3.png"))
-
+    # --- Métodos de Listado/Consulta ---
     def listar(self):
         """Devuelve la lista completa de usuarios."""
         return self._usuarios
@@ -45,10 +42,52 @@ class GestorUsuarios:
                 return i
         return -1
 
+    def filtrar(self, nombre_filtro="", genero_filtro=""):
+        """Devuelve una lista de usuarios que cumplen con los criterios de búsqueda/filtrado."""
+        # Normalizar filtros a minúsculas
+        nombre_filtro = nombre_filtro.strip().lower()
+
+        usuarios_filtrados = []
+        for usuario in self._usuarios:
+            # 1. Coincidencia por nombre (si el filtro no está vacío)
+            coincide_nombre = nombre_filtro in usuario.nombre.lower() or not nombre_filtro
+
+            # 2. Coincidencia por género (si el filtro no es "Todos")
+            coincide_genero = (usuario.genero == genero_filtro or
+                               not genero_filtro or
+                               genero_filtro == "Todos")
+
+            if coincide_nombre and coincide_genero:
+                usuarios_filtrados.append(usuario)
+
+        return usuarios_filtrados
+
+    # --- Métodos de Mutación (Alta/Edición/Baja) ---
     def agregar(self, usuario):
         """Añade un nuevo objeto Usuario a la lista."""
         self._usuarios.append(usuario)
 
+    def actualizar(self, indice, nuevos_datos):
+        """
+        Actualiza el usuario en un índice dado con los nuevos_datos (diccionario).
+        """
+        if 0 <= indice < len(self._usuarios):
+            usuario = self._usuarios[indice]
+            usuario.nombre = nuevos_datos.get('nombre', usuario.nombre)
+            usuario.edad = nuevos_datos.get('edad', usuario.edad)
+            usuario.genero = nuevos_datos.get('genero', usuario.genero)
+            usuario.avatar = nuevos_datos.get('avatar', usuario.avatar)
+            return True
+        return False
+
+    def eliminar(self, indice):
+        """Elimina el usuario en el índice dado."""
+        if 0 <= indice < len(self._usuarios):
+            del self._usuarios[indice]
+            return True
+        return False
+
+    # --- Métodos de Persistencia (CSV) ---
     def guardar_csv(self):
         """Guarda la lista de usuarios en el archivo CSV."""
         with open(self.ARCHIVO_CSV, 'w', newline='', encoding='utf-8') as f:
@@ -58,7 +97,7 @@ class GestorUsuarios:
             # Datos
             for u in self._usuarios:
                 escritor.writerow([u.nombre, u.edad, u.genero, u.avatar])
-        return len(self._usuarios)  # Devolver el número de registros guardados
+        return len(self._usuarios)
 
     def cargar_csv(self):
         """Carga los usuarios desde el archivo CSV, manejando excepciones."""
@@ -71,16 +110,12 @@ class GestorUsuarios:
                 for fila in lector:
                     try:
                         nombre, edad_str, genero, avatar = fila
-                        edad = int(edad_str)  # Validación de tipo
+                        edad = int(edad_str)
                         self._usuarios.append(Usuario(nombre, edad, genero, avatar))
                         registros_cargados += 1
                     except ValueError:
                         print(f"Advertencia: Fila con datos corruptos omitida: {fila}")
-                    except Exception as e:
-                        print(f"Error al leer fila: {fila}. Error: {e}")
-
         except FileNotFoundError:
-            # Si el archivo no existe, no es un error, simplemente se inicia vacío.
-            pass
+            pass  # Si no existe, se inicia con la lista vacía
 
         return registros_cargados

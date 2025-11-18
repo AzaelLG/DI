@@ -1,19 +1,20 @@
-import tkinter
-
 import customtkinter as ctk
 
+import tkinter  # Necesario para tkinter.Menu
 
+
+# --- VENTANA MODAL PARA AÑADIR USUARIO (AddUserView) ---
 class AddUserView:
     def __init__(self, master, avatar_names):
         self.window = ctk.CTkToplevel(master)
         self.window.title("Añadir Nuevo Usuario")
         self.window.geometry("350x400")
-        self.window.grab_set()  # ¡Esto la hace modal!
+        self.window.grab_set()
+        self.window.resizable(False, False)
 
         self.frame = ctk.CTkFrame(self.window)
         self.frame.pack(padx=20, pady=20, fill="both", expand=True)
 
-        # Widgets del formulario
         ctk.CTkLabel(self.frame, text="Nombre:").pack(pady=(10, 0))
         self.nombre_entry = ctk.CTkEntry(self.frame)
         self.nombre_entry.pack(fill="x", padx=10)
@@ -36,7 +37,6 @@ class AddUserView:
                                                    variable=self.avatar_var)
         self.avatar_optionmenu.pack(fill="x", padx=10)
 
-        # El botón de guardar será configurado por el controlador
         self.guardar_button = ctk.CTkButton(self.frame, text="Guardar")
         self.guardar_button.pack(pady=20)
 
@@ -49,42 +49,114 @@ class AddUserView:
             "avatar": self.avatar_var.get()
         }
 
+
+# --- VENTANA MODAL PARA EDITAR USUARIO (EditUserView) ---
+class EditUserView:
+    def __init__(self, master, avatar_names):
+        self.window = ctk.CTkToplevel(master)
+        self.window.title("Editar Usuario")
+        self.window.geometry("350x400")
+        self.window.grab_set()
+        self.window.resizable(False, False)
+
+        self.frame = ctk.CTkFrame(self.window)
+        self.frame.pack(padx=20, pady=20, fill="both", expand=True)
+
+        ctk.CTkLabel(self.frame, text="Nombre:").pack(pady=(10, 0))
+        self.nombre_entry = ctk.CTkEntry(self.frame)
+        self.nombre_entry.pack(fill="x", padx=10)
+
+        ctk.CTkLabel(self.frame, text="Edad:").pack(pady=(10, 0))
+        self.edad_entry = ctk.CTkEntry(self.frame)
+        self.edad_entry.pack(fill="x", padx=10)
+
+        ctk.CTkLabel(self.frame, text="Género:").pack(pady=(10, 0))
+        self.genero_var = ctk.StringVar()
+        self.genero_optionmenu = ctk.CTkOptionMenu(self.frame,
+                                                   values=["Masculino", "Femenino", "No especificado"],
+                                                   variable=self.genero_var)
+        self.genero_optionmenu.pack(fill="x", padx=10)
+
+        ctk.CTkLabel(self.frame, text="Avatar:").pack(pady=(10, 0))
+        self.avatar_var = ctk.StringVar()
+        self.avatar_optionmenu = ctk.CTkOptionMenu(self.frame,
+                                                   values=avatar_names,
+                                                   variable=self.avatar_var)
+        self.avatar_optionmenu.pack(fill="x", padx=10)
+
+        self.guardar_button = ctk.CTkButton(self.frame, text="Guardar Cambios")
+        self.guardar_button.pack(pady=20)
+
+    def set_data(self, usuario):
+        """Pre-carga los datos del usuario a editar."""
+        self.nombre_entry.insert(0, usuario.nombre)
+        self.edad_entry.insert(0, str(usuario.edad))
+        self.genero_var.set(usuario.genero)
+        self.avatar_var.set(usuario.avatar)
+
+    def get_data(self):
+        """Recoge los datos del formulario y los devuelve como diccionario."""
+        return {
+            "nombre": self.nombre_entry.get(),
+            "edad": self.edad_entry.get(),
+            "genero": self.genero_var.get(),
+            "avatar": self.avatar_var.get()
+        }
+
+
+# --- VISTA PRINCIPAL (MainView) ---
 class MainView:
     def __init__(self, master):
         self.master = master
         self.frame = ctk.CTkFrame(master)
         self.frame.pack(fill="both", expand=True)
 
-        # Configuración de grid: 2 columnas, pesos 1 y 3.
-        self.frame.grid_columnconfigure(0, weight=1)  # Columna lista
-        self.frame.grid_columnconfigure(1, weight=3)  # Columna detalles
-        self.frame.grid_rowconfigure(0, weight=1) # Fila principal
+        # Configuración de grid: Columna 0 (lista), Columna 1 (detalles), Fila 1 (Estado)
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(1, weight=3)
+        self.frame.grid_rowconfigure(0, weight=1)
+        self.frame.grid_rowconfigure(1, weight=0)  # Fila para la barra de estado
 
         self._crear_widgets_lista()
         self._crear_widgets_detalles()
-        self.crear_menu_bar()
+        self._crear_menu_bar()
+        self._crear_barra_estado()  # ¡NUEVO!
 
+    # --- Creación de Widgets ---
     def _crear_widgets_lista(self):
-        """Crea el frame para la lista de usuarios a la izquierda."""
+        """Crea el frame para la lista de usuarios y el botón de añadir."""
         self.lista_frame = ctk.CTkFrame(self.frame)
         self.lista_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
         ctk.CTkLabel(self.lista_frame, text="Usuarios",
                      font=ctk.CTkFont(weight="bold")).pack(pady=5)
 
-        # Frame desplazable para la lista de botones
+        self.add_button = ctk.CTkButton(self.lista_frame, text="➕ Añadir Usuario")
+        self.add_button.pack(fill="x", padx=5, pady=(5, 10))
+
+        # Widgets de Búsqueda/Filtro (¡NUEVOS!)
+        self.busqueda_var = ctk.StringVar()
+        self.busqueda_entry = ctk.CTkEntry(self.lista_frame, placeholder_text="Buscar por nombre",
+                                           textvariable=self.busqueda_var)
+        self.busqueda_entry.pack(fill="x", padx=5, pady=5)
+
+        self.genero_filtro_var = ctk.StringVar(value="Todos")
+        self.genero_filtro_menu = ctk.CTkOptionMenu(self.lista_frame,
+                                                    values=["Todos", "Masculino", "Femenino", "No especificado"],
+                                                    variable=self.genero_filtro_var)
+        self.genero_filtro_menu.pack(fill="x", padx=5, pady=5)
+
         self.lista_usuarios_scrollable = ctk.CTkScrollableFrame(self.lista_frame)
         self.lista_usuarios_scrollable.pack(fill="both", expand=True, padx=5, pady=5)
 
     def _crear_widgets_detalles(self):
-        """Crea el frame y etiquetas para los detalles del usuario a la derecha."""
+        """Crea el frame, etiquetas y botones para los detalles del usuario a la derecha."""
         self.detalles_frame = ctk.CTkFrame(self.frame)
         self.detalles_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
         ctk.CTkLabel(self.detalles_frame, text="Detalles del Usuario",
                      font=ctk.CTkFont(weight="bold", size=16)).pack(pady=10)
 
-        # Widgets de visualización (serán actualizados por el controlador)
         self.nombre_label = ctk.CTkLabel(self.detalles_frame, text="Nombre: ")
         self.nombre_label.pack(pady=5)
         self.edad_label = ctk.CTkLabel(self.detalles_frame, text="Edad: ")
@@ -92,29 +164,56 @@ class MainView:
         self.genero_label = ctk.CTkLabel(self.detalles_frame, text="Género: ")
         self.genero_label.pack(pady=5)
 
-        # Etiqueta para el avatar
         self.avatar_label = ctk.CTkLabel(self.detalles_frame, text="", width=150, height=150)
         self.avatar_label.pack(pady=20)
-        self.avatar_label.configure(image=None) # Inicializar sin imagen
 
-    def actualizar_lista_usuarios(self, usuarios, on_seleccionar_callback):
+        # Botones de Edición y Eliminación (¡NUEVOS!)
+        self.edit_button = ctk.CTkButton(self.detalles_frame, text="✏️ Editar", state="disabled")
+        self.edit_button.pack(pady=(10, 5))
+        self.delete_button = ctk.CTkButton(self.detalles_frame, text="🗑️ Eliminar", fg_color="red", state="disabled")
+        self.delete_button.pack(pady=(0, 10))
+
+    def _crear_menu_bar(self):
+        """Crea la barra de menú."""
+        self.menubar = tkinter.Menu(self.master)
+        self.master.config(menu=self.menubar)
+
+        self.menu_archivo = tkinter.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="Archivo", menu=self.menu_archivo)
+
+        # Necesario para Fase 5, pero se inicializa aquí
+        self.menu_opciones = tkinter.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="Opciones", menu=self.menu_opciones)
+
+    def _crear_barra_estado(self):
+        """Crea la barra de estado en la parte inferior (¡NUEVO!)."""
+        self.estado_label = ctk.CTkLabel(self.frame, text="Estado: Listo", anchor="w",
+                                         fg_color="transparent", text_color="gray")
+        self.estado_label.grid(row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=(0, 5))
+
+    # --- Métodos de Actualización ---
+    def set_estado(self, mensaje):
+        """Actualiza el mensaje de la barra de estado (¡NUEVO!)."""
+        self.estado_label.configure(text=f"Estado: {mensaje}")
+
+    def actualizar_lista_usuarios(self, usuarios, on_seleccionar_callback, on_doble_clic_callback):
         """
-        Recibe la lista de usuarios y el callback del controlador.
-        Dibuja los botones para cada usuario.
+        Recibe la lista filtrada de usuarios y dos callbacks.
+        Dibuja los botones y configura el doble clic para edición.
         """
-        # Eliminar widgets anteriores
         for widget in self.lista_usuarios_scrollable.winfo_children():
             widget.destroy()
 
-        # Crear un botón por usuario
         for i, usuario in enumerate(usuarios):
             btn = ctk.CTkButton(
                 self.lista_usuarios_scrollable,
                 text=usuario.nombre,
-                # Usar lambda para pasar el índice al callback del controlador
+                # El comando recibe el índice del usuario en la lista FILTRADA
                 command=lambda idx=i: on_seleccionar_callback(idx)
             )
             btn.pack(fill="x", padx=5, pady=2)
+            # Binding de doble clic para edición (usa el nombre, que es único)
+            btn.bind("<Double-Button-1>", lambda event, u=usuario: on_doble_clic_callback(u.nombre))
 
     def mostrar_detalles_usuario(self, usuario, avatar_image):
         """Actualiza las etiquetas con los datos del usuario seleccionado."""
@@ -123,33 +222,22 @@ class MainView:
             self.edad_label.configure(text=f"Edad: {usuario.edad}")
             self.genero_label.configure(text=f"Género: {usuario.genero}")
 
-            # Actualizar imagen (si existe)
             if avatar_image:
                 self.avatar_label.configure(image=avatar_image, text="")
             else:
                 self.avatar_label.configure(image=None, text="Sin Avatar")
+
+            # Habilitar botones de Edición/Eliminación
+            self.edit_button.configure(state="normal")
+            self.delete_button.configure(state="normal")
+
         else:
-            # Limpiar detalles si no hay usuario (ej. lista vacía)
+            # Limpiar detalles si no hay usuario (ej. lista vacía o deselección)
             self.nombre_label.configure(text="Nombre:")
             self.edad_label.configure(text="Edad:")
             self.genero_label.configure(text="Género:")
             self.avatar_label.configure(image=None, text="")
 
-    def _crear_widgets_lista(self):
-        """Crea el frame para la lista de usuarios y el botón de añadir."""
-        # ... (Frame y Label igual)
-
-        # Botón para abrir la ventana modal
-        self.add_button = ctk.CTkButton(self.lista_frame, text="➕ Añadir Usuario")
-        self.add_button.pack(fill="x", padx=5, pady=(5, 10))
-
-    def _crear_menu_bar(self):
-        """Crea la barra de menú, exponiendo los menús al controlador."""
-        self.menubar = tkinter.Menu(self.master)
-        self.master.config(menu=self.menubar)
-
-        # Menú Archivo
-        self.menu_archivo = tkinter.Menu(self.menubar, tearoff=0)
-        self.menubar.add_cascade(label="Archivo", menu=self.menu_archivo)
-
-
+            # Deshabilitar botones de Edición/Eliminación
+            self.edit_button.configure(state="disabled")
+            self.delete_button.configure(state="disabled")
