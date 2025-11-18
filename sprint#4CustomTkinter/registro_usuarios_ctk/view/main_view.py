@@ -1,3 +1,5 @@
+import tkinter
+
 import customtkinter as ctk
 
 
@@ -60,6 +62,7 @@ class MainView:
 
         self._crear_widgets_lista()
         self._crear_widgets_detalles()
+        self.crear_menu_bar()
 
     def _crear_widgets_lista(self):
         """Crea el frame para la lista de usuarios a la izquierda."""
@@ -139,3 +142,14 @@ class MainView:
         # Botón para abrir la ventana modal
         self.add_button = ctk.CTkButton(self.lista_frame, text="➕ Añadir Usuario")
         self.add_button.pack(fill="x", padx=5, pady=(5, 10))
+
+    def _crear_menu_bar(self):
+        """Crea la barra de menú, exponiendo los menús al controlador."""
+        self.menubar = tkinter.Menu(self.master)
+        self.master.config(menu=self.menubar)
+
+        # Menú Archivo
+        self.menu_archivo = tkinter.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="Archivo", menu=self.menu_archivo)
+
+

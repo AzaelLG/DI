@@ -15,14 +15,15 @@ class AppController:
         self.master = master
         self.model = GestorUsuarios()
         self.view = MainView(master)
-
+        self.view.add_button.configure(command=self.abrir_ventana_añadir)
         self.BASE_DIR = Path(__file__).resolve().parent.parent
         self.ASSETS_PATH = self.BASE_DIR / "assets"
         self.avatar_images = {}
         self.avatar_files = [f.name for f in self.ASSETS_PATH.glob('*.png') if f.is_file()]
         if not self.avatar_files:
             self.avatar_files = ["default.png"]
-
+        self._configurar_menu_commands()
+        self.cargar_usuarios()
         self.view.add_button.configure(command=self.abrir_ventana_añadir)
 
         self.refrescar_lista_usuarios()
@@ -124,3 +125,30 @@ class AppController:
         idx = self.model.get_indice_by_name(nuevo_usuario.nombre)
         if idx != -1:
             self.seleccionar_usuario(idx)
+
+    def _configurar_menu_commands(self):
+        """Conecta los comandos del menú Archivo a los métodos del controlador."""
+        self.view.menu_archivo.add_command(label="Cargar", command=self.cargar_usuarios)
+        self.view.menu_archivo.add_command(label="Guardar", command=self.guardar_usuarios)
+        self.view.menu_archivo.add_separator()
+        self.view.menu_archivo.add_command(label="Salir", command=self.master.quit)  # Usa quit() para cerrar la app
+
+    # ... (refrescar_lista_usuarios, seleccionar_usuario, _load_avatar, abrir_ventana_añadir, añadir_usuario igual)
+
+    def guardar_usuarios(self):
+        """Llama al modelo para guardar en CSV y da feedback al usuario."""
+        try:
+            count = self.model.guardar_csv()
+            messagebox.showinfo("Guardado OK", f"Se han guardado {count} usuarios correctamente.")
+        except Exception as e:
+            messagebox.showerror("Error de Guardado", f"Ocurrió un error al guardar el archivo: {e}")
+
+    def cargar_usuarios(self):
+        """Llama al modelo para cargar desde CSV y actualiza la lista."""
+        try:
+            count = self.model.cargar_csv()
+            messagebox.showinfo("Carga OK", f"Se han cargado {count} usuarios desde el archivo.")
+            self.refrescar_lista_usuarios()  # Actualizar la vista con los nuevos datos
+        except Exception as e:
+            # Solo si ocurre un error inesperado (ej. permisos), no por FileNotFoundError
+            messagebox.showerror("Error de Carga", f"Ocurrió un error al cargar el archivo: {e}")
