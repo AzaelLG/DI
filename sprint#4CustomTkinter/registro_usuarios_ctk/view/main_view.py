@@ -1,6 +1,6 @@
 import customtkinter as ctk
 
-import tkinter  # Necesario para tkinter.Menu
+import tkinter  # Necesario para tkinter.Menu y BooleanVar
 
 
 # --- VENTANA MODAL PARA AÑADIR USUARIO (AddUserView) ---
@@ -33,7 +33,7 @@ class AddUserView:
         ctk.CTkLabel(self.frame, text="Avatar:").pack(pady=(10, 0))
         self.avatar_var = ctk.StringVar(value=avatar_names[0] if avatar_names else "")
         self.avatar_optionmenu = ctk.CTkOptionMenu(self.frame,
-                                                   values=avatar_names,
+                                                   values=["avatar1.png","avatar2.png"],
                                                    variable=self.avatar_var)
         self.avatar_optionmenu.pack(fill="x", padx=10)
 
@@ -80,7 +80,7 @@ class EditUserView:
         ctk.CTkLabel(self.frame, text="Avatar:").pack(pady=(10, 0))
         self.avatar_var = ctk.StringVar()
         self.avatar_optionmenu = ctk.CTkOptionMenu(self.frame,
-                                                   values=avatar_names,
+                                                   values=["avatar1.png","avatar2.png"],
                                                    variable=self.avatar_var)
         self.avatar_optionmenu.pack(fill="x", padx=10)
 
@@ -111,18 +111,19 @@ class MainView:
         self.frame = ctk.CTkFrame(master)
         self.frame.pack(fill="both", expand=True)
 
-        # Configuración de grid: Columna 0 (lista), Columna 1 (detalles), Fila 1 (Estado)
+        # Configuración de grid
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.grid_columnconfigure(1, weight=3)
         self.frame.grid_rowconfigure(0, weight=1)
-        self.frame.grid_rowconfigure(1, weight=0)  # Fila para la barra de estado
+        self.frame.grid_rowconfigure(1, weight=0)
 
         self._crear_widgets_lista()
         self._crear_widgets_detalles()
         self._crear_menu_bar()
-        self._crear_barra_estado()  # ¡NUEVO!
+        self._crear_barra_estado()
 
-    # --- Creación de Widgets ---
+        # --- Creación de Widgets ---
+
     def _crear_widgets_lista(self):
         """Crea el frame para la lista de usuarios y el botón de añadir."""
         self.lista_frame = ctk.CTkFrame(self.frame)
@@ -134,7 +135,7 @@ class MainView:
         self.add_button = ctk.CTkButton(self.lista_frame, text="➕ Añadir Usuario")
         self.add_button.pack(fill="x", padx=5, pady=(5, 10))
 
-        # Widgets de Búsqueda/Filtro (¡NUEVOS!)
+        # Widgets de Búsqueda/Filtro
         self.busqueda_var = ctk.StringVar()
         self.busqueda_entry = ctk.CTkEntry(self.lista_frame, placeholder_text="Buscar por nombre",
                                            textvariable=self.busqueda_var)
@@ -167,7 +168,6 @@ class MainView:
         self.avatar_label = ctk.CTkLabel(self.detalles_frame, text="", width=150, height=150)
         self.avatar_label.pack(pady=20)
 
-        # Botones de Edición y Eliminación (¡NUEVOS!)
         self.edit_button = ctk.CTkButton(self.detalles_frame, text="✏️ Editar", state="disabled")
         self.edit_button.pack(pady=(10, 5))
         self.delete_button = ctk.CTkButton(self.detalles_frame, text="🗑️ Eliminar", fg_color="red", state="disabled")
@@ -181,24 +181,23 @@ class MainView:
         self.menu_archivo = tkinter.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label="Archivo", menu=self.menu_archivo)
 
-        # Necesario para Fase 5, pero se inicializa aquí
+        # Menú Opciones (NUEVO para el Checkbutton de auto-guardado)
         self.menu_opciones = tkinter.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label="Opciones", menu=self.menu_opciones)
 
     def _crear_barra_estado(self):
-        """Crea la barra de estado en la parte inferior (¡NUEVO!)."""
+        """Crea la barra de estado en la parte inferior."""
         self.estado_label = ctk.CTkLabel(self.frame, text="Estado: Listo", anchor="w",
                                          fg_color="transparent", text_color="gray")
         self.estado_label.grid(row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=(0, 5))
 
     # --- Métodos de Actualización ---
     def set_estado(self, mensaje):
-        """Actualiza el mensaje de la barra de estado (¡NUEVO!)."""
+        """Actualiza el mensaje de la barra de estado."""
         self.estado_label.configure(text=f"Estado: {mensaje}")
 
     def actualizar_lista_usuarios(self, usuarios, on_seleccionar_callback, on_doble_clic_callback):
         """
-        Recibe la lista filtrada de usuarios y dos callbacks.
         Dibuja los botones y configura el doble clic para edición.
         """
         for widget in self.lista_usuarios_scrollable.winfo_children():
@@ -208,11 +207,9 @@ class MainView:
             btn = ctk.CTkButton(
                 self.lista_usuarios_scrollable,
                 text=usuario.nombre,
-                # El comando recibe el índice del usuario en la lista FILTRADA
                 command=lambda idx=i: on_seleccionar_callback(idx)
             )
             btn.pack(fill="x", padx=5, pady=2)
-            # Binding de doble clic para edición (usa el nombre, que es único)
             btn.bind("<Double-Button-1>", lambda event, u=usuario: on_doble_clic_callback(u.nombre))
 
     def mostrar_detalles_usuario(self, usuario, avatar_image):
@@ -227,17 +224,13 @@ class MainView:
             else:
                 self.avatar_label.configure(image=None, text="Sin Avatar")
 
-            # Habilitar botones de Edición/Eliminación
             self.edit_button.configure(state="normal")
             self.delete_button.configure(state="normal")
-
         else:
-            # Limpiar detalles si no hay usuario (ej. lista vacía o deselección)
             self.nombre_label.configure(text="Nombre:")
             self.edad_label.configure(text="Edad:")
             self.genero_label.configure(text="Género:")
             self.avatar_label.configure(image=None, text="")
 
-            # Deshabilitar botones de Edición/Eliminación
             self.edit_button.configure(state="disabled")
             self.delete_button.configure(state="disabled")
