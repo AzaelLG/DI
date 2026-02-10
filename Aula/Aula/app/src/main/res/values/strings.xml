@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Aula+</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="aula_home">Aula+ (Home)</string>
+    <string name="login_button">Entrar</string>
+    <string name="register_button">Crear Cuenta</string>
+    <string name="no_data_text">Crea un aviso para que salga aqui</string>
+    <string name="hint_email">Correo </string>
+    <string name="cd_add_notice">Añadir nuevo aviso</string>
+    <string name="cd_logout">Cerrar sesión</string>
+    <string name="cd_app_logo">Logotipo de Aula Más</string>
+    <string name="cd_delete_last">Borrar último aviso</string>
+    <string name="icono_luna">🌙</string>
+    <string name="aula_login">Aula+ -Login </string>
+    <string name="no_account">¿No tienes cuenta?</string>
+    <string name="register">Registrate</string>
+    <string name="aula_register">Aula+ -Registro </string>
+    <string name ="account_existence">Ya tengo cuenta</string>
+    <string name="Materia">Materia (DI, SI, DWES...)</string>
+    <string name="Titulo_aviso">Titulo del aviso</string>
+    <string name="Contraseña">Contraseña</string>
+    <string name="Contraseña2">Repetir contraseña</string>
+
+</resources>
